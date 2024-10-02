@@ -19,37 +19,43 @@ app = Client("4gb_FileRenameBot", api_id=Config.API_ID, api_hash=Config.API_HASH
    
 @Client.on_message(filters.private & (filters.document | filters.audio | filters.video))
 async def rename_start(client, message):
-    user_id = message.from_user.id
+    user_id  = message.from_user.id
+    if await digital_botz.has_premium_access(user_id):
+        rkn_file = getattr(message, message.media.value)
+        filename = rkn_file.file_name
+        filesize=humanbytes(rkn_file.file_size)
+        mime_type = rkn_file.mime_type
+        dcid = FileId.decode(rkn_file.file_id).dc_id
+        extension_type = mime_type.split('/')[0]
+        if not Config.STRING_SESSION:
+            if rkn_file.file_size > 2000 * 1024 * 1024:
+                 return await message.reply_text("Sᴏʀʀy Bʀᴏ Tʜɪꜱ Bᴏᴛ Iꜱ Dᴏᴇꜱɴ'ᴛ Sᴜᴩᴩᴏʀᴛ Uᴩʟᴏᴀᴅɪɴɢ Fɪʟᴇꜱ Bɪɢɢᴇʀ Tʜᴀɴ 2Gʙ+")
 
-    # Proceed without checking premium access
-    rkn_file = getattr(message, message.media.value)
-    filename = rkn_file.file_name
-    filesize = humanbytes(rkn_file.file_size)
-    mime_type = rkn_file.mime_type
-    dcid = FileId.decode(rkn_file.file_id).dc_id
-    extension_type = mime_type.split('/')[0]
-
-    # Optional: Limit file upload to 2GB for all users
-    if not Config.STRING_SESSION:
-        if rkn_file.file_size > 2000 * 1024 * 1024:
-            return await message.reply_text("Sorry, this bot doesn't support uploading files bigger than 2GB.")
-
-    try:
-        await message.reply_text(
-            text=f"**Media Info**\n\n◈ Old file name: `{filename}`\n◈ Extension: `{extension_type.upper()}`\n◈ File size: `{filesize}`\n◈ MIME type: `{mime_type}`\n◈ DC ID: `{dcid}`\n\nPlease enter the new filename with extension and reply to this message...",
-            reply_to_message_id=message.id,
-            reply_markup=ForceReply(True)
+        try:
+            await message.reply_text(
+            text=f"**__ᴍᴇᴅɪᴀ ɪɴꜰᴏ\n\n◈ ᴏʟᴅ ꜰɪʟᴇ ɴᴀᴍᴇ: `{filename}`\n\n◈ ᴇxᴛᴇɴꜱɪᴏɴ: `{extension_type.upper()}`\n◈ ꜰɪʟᴇ ꜱɪᴢᴇ: `{filesize}`\n◈ ᴍɪᴍᴇ ᴛʏᴇᴩ: `{mime_type}`\n◈ ᴅᴄ ɪᴅ: `{dcid}`\n\nᴘʟᴇᴀsᴇ ᴇɴᴛᴇʀ ᴛʜᴇ ɴᴇᴡ ғɪʟᴇɴᴀᴍᴇ ᴡɪᴛʜ ᴇxᴛᴇɴsɪᴏɴ ᴀɴᴅ ʀᴇᴘʟʏ ᴛʜɪs ᴍᴇssᴀɢᴇ....__**",
+	    reply_to_message_id=message.id,  
+	    reply_markup=ForceReply(True)
+        )       
+            await sleep(30)
+        except FloodWait as e:
+            await sleep(e.value)
+            await message.reply_text(
+            text=f"**__ᴍᴇᴅɪᴀ ɪɴꜰᴏ\n\n◈ ᴏʟᴅ ꜰɪʟᴇ ɴᴀᴍᴇ: `{filename}`\n\n◈ ᴇxᴛᴇɴꜱɪᴏɴ: `{extension_type.upper()}`\n◈ ꜰɪʟᴇ ꜱɪᴢᴇ: `{filesize}`\n◈ ᴍɪᴍᴇ ᴛʏᴇᴩ: `{mime_type}`\n◈ ᴅᴄ ɪᴅ: `{dcid}`\n\nᴘʟᴇᴀsᴇ ᴇɴᴛᴇʀ ᴛʜᴇ ɴᴇᴡ ғɪʟᴇɴᴀᴍᴇ ᴡɪᴛʜ ᴇxᴛᴇɴsɪᴏɴ ᴀɴᴅ ʀᴇᴘʟʏ ᴛʜɪs ᴍᴇssᴀɢᴇ....__**",
+	    reply_to_message_id=message.id,  
+	    reply_markup=ForceReply(True)
         )
-        await sleep(30)
-    except FloodWait as e:
-        await sleep(e.value)
-        await message.reply_text(
-            text=f"**Media Info**\n\n◈ Old file name: `{filename}`\n◈ Extension: `{extension_type.upper()}`\n◈ File size: `{filesize}`\n◈ MIME type: `{mime_type}`\n◈ DC ID: `{dcid}`\n\nPlease enter the new filename with extension and reply to this message...",
-            reply_to_message_id=message.id,
-            reply_markup=ForceReply(True)
-        )
-    except:
-        pass
+        except:
+            pass
+    else:
+        btn = [
+            [InlineKeyboardButton("⚠️ ᴄʟᴏsᴇ / ᴅᴇʟᴇᴛᴇ ⚠️", callback_data="close")]
+        ]
+        reply_markup = InlineKeyboardMarkup(btn)
+        m=await message.reply_sticker("CAACAgIAAxkBAAIBTGVjQbHuhOiboQsDm35brLGyLQ28AAJ-GgACglXYSXgCrotQHjibHgQ")         
+        await message.reply_text(f"**😢 You Don't Have Any Premium Subscription.\n\n Check Out Our Premium /plan**",reply_markup=reply_markup)
+        await sleep(20)
+        await m.delete()
 
 @Client.on_message(filters.private & filters.reply)
 async def refunc(client, message):
@@ -88,13 +94,6 @@ async def doc(bot, update):
         os.mkdir("Metadata")
 
     user_id = int(update.message.chat.id) 
-
-    # Check if the user has premium access
-    if not await check_premium(user_id):
-        return await update.message.edit(
-            "❌ You need premium access to use metadata editing."
-        )
-
     new_name = update.message.text
     new_filename_ = new_name.split(":-")[1]
     try:
@@ -103,7 +102,7 @@ async def doc(bot, update):
         suffix = await digital_botz.get_suffix(user_id)
         new_filename = add_prefix_suffix(new_filename_, prefix, suffix)
     except Exception as e:
-        return await update.message.edit(f"⚠️ Something went wrong can't set Prefix or Suffix ☹️ \n\nError: {e}")
+        return await update.message.edit(f"⚠️ Something went wrong can't able to set Prefix or Suffix ☹️ \n\n❄️ Contact My Creator -> @GwitcherG\nError: {e}")
 
     # msg file location 
     file = update.message.reply_to_message
@@ -118,10 +117,10 @@ async def doc(bot, update):
     try:
         dl_path = await bot.download_media(message=file, file_name=file_path, progress=progress_for_pyrogram, progress_args=(DOWNLOAD_TEXT, ms, time.time()))                    
     except Exception as e:
-     	return await ms.edit(str(e))
+     	return await ms.edit(e)
 
     metadata_mode = await digital_botz.get_metadata_mode(user_id)
-    if metadata_mode:
+    if (metadata_mode):
         metadata = await digital_botz.get_metadata_code(user_id)
         if metadata:
             await ms.edit("I Fᴏᴜɴᴅ Yᴏᴜʀ Mᴇᴛᴀᴅᴀᴛᴀ\n\n__**Pʟᴇᴀsᴇ Wᴀɪᴛ...**__\n**Aᴅᴅɪɴɢ Mᴇᴛᴀᴅᴀᴛᴀ Tᴏ Fɪʟᴇ....**")
@@ -130,8 +129,11 @@ async def doc(bot, update):
             process = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
             stdout, stderr = await process.communicate()
             er = stderr.decode()
-            if er:
-                return await ms.edit(str(er) + "\n\n**Error**")
+            try:
+                if er:
+                    return await ms.edit(str(er) + "\n\n**Error**")
+            except BaseException:
+                pass
         await ms.edit("**Metadata added to the file successfully ✅**\n\n**Tʀyɪɴɢ Tᴏ Uᴩʟᴏᴀᴅɪɴɢ....**")
     else:
         await ms.edit("`Try To Uploading....`")
@@ -222,7 +224,14 @@ async def doc(bot, update):
                 await ms.delete()
                 await bot.delete_messages(from_chat, mg_id)
         except Exception as e:
-            cleanup_files([file_path, ph_path, metadata_path, dl_path])
+            if file_path:
+                os.remove(file_path)
+            if ph_path:
+                os.remove(ph_path)
+            if metadata_path:
+                os.remove(metadata_path)
+            if dl_path:
+                os.remove(dl_path)
             return await ms.edit(f" Eʀʀᴏʀ {e}")
     else:
         try:
@@ -253,10 +262,29 @@ async def doc(bot, update):
                     progress=progress_for_pyrogram,
                     progress_args=(UPLOAD_TEXT, ms, time.time()))
         except Exception as e:
-            cleanup_files([file_path, ph_path, metadata_path, dl_path])
+            if file_path:
+                os.remove(file_path)
+            if ph_path:
+                os.remove(ph_path)
+            if metadata_path:
+                os.remove(metadata_path)
+            if dl_path:
+                os.remove(dl_path)
             return await ms.edit(f" Eʀʀᴏʀ {e}")
 
+# some new feature adding soon ( sample screenshot & sample video )
+# please give fork & star and share with your friends repo
+# please don't sell the repo ( it's free 🥰)
+# please give 200 Fork & 200 star target 🎯 
+# fast guys now support again started 
+	
     await ms.delete()
-    cleanup_files([ph_path, file_path, dl_path, metadata_path])
-
+    if ph_path:
+        os.remove(ph_path)
+    if file_path:
+        os.remove(file_path)
+    if dl_path:
+        os.remove(dl_path)
+    if metadata_path:
+        os.remove(metadata_path)
     
