@@ -19,43 +19,38 @@ app = Client("4gb_FileRenameBot", api_id=Config.API_ID, api_hash=Config.API_HASH
    
 @Client.on_message(filters.private & (filters.document | filters.audio | filters.video))
 async def rename_start(client, message):
-    user_id  = message.from_user.id
-    if await digital_botz.has_premium_access(user_id):
-        rkn_file = getattr(message, message.media.value)
-        filename = rkn_file.file_name
-        filesize=humanbytes(rkn_file.file_size)
-        mime_type = rkn_file.mime_type
-        dcid = FileId.decode(rkn_file.file_id).dc_id
-        extension_type = mime_type.split('/')[0]
-        if not Config.STRING_SESSION:
-            if rkn_file.file_size > 2000 * 1024 * 1024:
-                 return await message.reply_text("Sᴏʀʀy Bʀᴏ Tʜɪꜱ Bᴏᴛ Iꜱ Dᴏᴇꜱɴ'ᴛ Sᴜᴩᴩᴏʀᴛ Uᴩʟᴏᴀᴅɪɴɢ Fɪʟᴇꜱ Bɪɢɢᴇʀ Tʜᴀɴ 2Gʙ+")
+    user_id = message.from_user.id
 
-        try:
-            await message.reply_text(
-            text=f"**__ᴍᴇᴅɪᴀ ɪɴꜰᴏ\n\n◈ ᴏʟᴅ ꜰɪʟᴇ ɴᴀᴍᴇ: `{filename}`\n\n◈ ᴇxᴛᴇɴꜱɪᴏɴ: `{extension_type.upper()}`\n◈ ꜰɪʟᴇ ꜱɪᴢᴇ: `{filesize}`\n◈ ᴍɪᴍᴇ ᴛʏᴇᴩ: `{mime_type}`\n◈ ᴅᴄ ɪᴅ: `{dcid}`\n\nᴘʟᴇᴀsᴇ ᴇɴᴛᴇʀ ᴛʜᴇ ɴᴇᴡ ғɪʟᴇɴᴀᴍᴇ ᴡɪᴛʜ ᴇxᴛᴇɴsɪᴏɴ ᴀɴᴅ ʀᴇᴘʟʏ ᴛʜɪs ᴍᴇssᴀɢᴇ....__**",
-	    reply_to_message_id=message.id,  
-	    reply_markup=ForceReply(True)
-        )       
-            await sleep(30)
-        except FloodWait as e:
-            await sleep(e.value)
-            await message.reply_text(
-            text=f"**__ᴍᴇᴅɪᴀ ɪɴꜰᴏ\n\n◈ ᴏʟᴅ ꜰɪʟᴇ ɴᴀᴍᴇ: `{filename}`\n\n◈ ᴇxᴛᴇɴꜱɪᴏɴ: `{extension_type.upper()}`\n◈ ꜰɪʟᴇ ꜱɪᴢᴇ: `{filesize}`\n◈ ᴍɪᴍᴇ ᴛʏᴇᴩ: `{mime_type}`\n◈ ᴅᴄ ɪᴅ: `{dcid}`\n\nᴘʟᴇᴀsᴇ ᴇɴᴛᴇʀ ᴛʜᴇ ɴᴇᴡ ғɪʟᴇɴᴀᴍᴇ ᴡɪᴛʜ ᴇxᴛᴇɴsɪᴏɴ ᴀɴᴅ ʀᴇᴘʟʏ ᴛʜɪs ᴍᴇssᴀɢᴇ....__**",
-	    reply_to_message_id=message.id,  
-	    reply_markup=ForceReply(True)
+    # Proceed without checking premium access
+    rkn_file = getattr(message, message.media.value)
+    filename = rkn_file.file_name
+    filesize = humanbytes(rkn_file.file_size)
+    mime_type = rkn_file.mime_type
+    dcid = FileId.decode(rkn_file.file_id).dc_id
+    extension_type = mime_type.split('/')[0]
+
+    # Optional: Limit file upload to 2GB for all users
+    if not Config.STRING_SESSION:
+        if rkn_file.file_size > 2000 * 1024 * 1024:
+            return await message.reply_text("Sorry, this bot doesn't support uploading files bigger than 2GB.")
+
+    try:
+        await message.reply_text(
+            text=f"**Media Info**\n\n◈ Old file name: `{filename}`\n◈ Extension: `{extension_type.upper()}`\n◈ File size: `{filesize}`\n◈ MIME type: `{mime_type}`\n◈ DC ID: `{dcid}`\n\nPlease enter the new filename with extension and reply to this message...",
+            reply_to_message_id=message.id,
+            reply_markup=ForceReply(True)
         )
-        except:
-            pass
-    else:
-        btn = [
-            [InlineKeyboardButton("⚠️ ᴄʟᴏsᴇ / ᴅᴇʟᴇᴛᴇ ⚠️", callback_data="close")]
-        ]
-        reply_markup = InlineKeyboardMarkup(btn)
-        m=await message.reply_sticker("CAACAgIAAxkBAAIBTGVjQbHuhOiboQsDm35brLGyLQ28AAJ-GgACglXYSXgCrotQHjibHgQ")         
-        await message.reply_text(f"**😢 You Don't Have Any Premium Subscription.\n\n Check Out Our Premium /plan**",reply_markup=reply_markup)
-        await sleep(20)
-        await m.delete()
+        await sleep(30)
+    except FloodWait as e:
+        await sleep(e.value)
+        await message.reply_text(
+            text=f"**Media Info**\n\n◈ Old file name: `{filename}`\n◈ Extension: `{extension_type.upper()}`\n◈ File size: `{filesize}`\n◈ MIME type: `{mime_type}`\n◈ DC ID: `{dcid}`\n\nPlease enter the new filename with extension and reply to this message...",
+            reply_to_message_id=message.id,
+            reply_markup=ForceReply(True)
+        )
+    except:
+        pass
+
 
 @Client.on_message(filters.private & filters.reply)
 async def refunc(client, message):
